@@ -236,7 +236,7 @@ void OptolinkP300::_sendAckHandler() {
 }
 
 void OptolinkP300::_receiveHandler() {
-  while (_stream->available() > 0) {  // while instead of if: read complete RX buffer
+  while ((_stream->available() > 0) && (_rcvBufferLen < sizeof(_rcvBuffer)) {  // while instead of if: read complete RX buffer
     _rcvBuffer[_rcvBufferLen] = _stream->read();
     ++_rcvBufferLen;
   }
