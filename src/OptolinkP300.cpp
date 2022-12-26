@@ -241,7 +241,7 @@ void OptolinkP300::_receiveHandler() {
     ++_rcvBufferLen;
   }
   if (_rcvBuffer[0] != 0x41) return;  // TODO(@bertmelis): find out why this is needed! I'd expect the rx-buffer to be empty.
-  if (_rcvBufferLen == _rcvLen) {          // message complete, check message
+  if (_rcvBufferLen >= _rcvLen) {          // message complete, check message
     if (_printer) {
       _printer->print(F("RCV "));
       _printHex(_printer, _rcvBuffer, _rcvBufferLen);
