@@ -87,8 +87,12 @@ void OptolinkP300::loop() {
       break;
   }
   if (_action == PROCESS && (millis() - _lastMillis > 5 * 1000UL)) {  // general timeout when reading or writing
-    if (_printer)
+    if (_printer) {
       _printer->println(F("read/write timeout"));
+      _printer->print(F("RCVBUF "));
+      _printHex(_printer, _rcvBuffer, _rcvBufferLen);
+      _printer->println();       
+    }
     _errorCode = 1;
     _setAction(RETURN_ERROR);
     _setState(RESET);
