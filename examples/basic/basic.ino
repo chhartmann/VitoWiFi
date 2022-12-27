@@ -14,18 +14,16 @@ globalCallback uses value.getString(char*,size_t). This method is independent of
 
 VitoWiFi_setProtocol(P300);
 
-DPTemp outsideTemp("outsideTemp", "boiler", 0x5525);
-DPTemp boilerTemp("boilertemp", "boiler", 0x0810);
-DPStat pumpStat("pump", "heating1", 0x2906);
+// DPTemp outsideTemp("outsideTemp", "boiler", 0x5525);
+DPTemp boilerTemp("boilertemp", "boiler", 0x0800);
+// DPStat pumpStat("pump", "heating1", 0x2906);
 
 void tempCallbackHandler(const IDatapoint& dp, DPValue value) {
-  float fahrenheit = 0;
-  fahrenheit = (5.0 / 9) * (value.getFloat() + 32);
   Serial1.print(dp.getGroup());
   Serial1.print(" - ");
   Serial1.print(dp.getName());
   Serial1.print(": ");
-  Serial1.println(fahrenheit, 1);  // print with 1 decimal
+  Serial1.println(value.getFloat(), 1);  // print with 1 decimal
 }
 
 void globalCallbackHandler(const IDatapoint& dp, DPValue value) {
@@ -39,7 +37,7 @@ void globalCallbackHandler(const IDatapoint& dp, DPValue value) {
 }
 
 void setup() {
-  outsideTemp.setCallback(tempCallbackHandler);
+  //  outsideTemp.setCallback(tempCallbackHandler);
   boilerTemp.setCallback(tempCallbackHandler);
   VitoWiFi.setGlobalCallback(globalCallbackHandler);  // this callback will be used for all DPs without specific callback
                                                       // must be set after adding at least 1 datapoint

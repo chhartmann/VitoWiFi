@@ -9,3 +9,4 @@ buildexamples.bat
 lib/readme.txt
 platformio.ini
 buildexamples.bat
+.build
