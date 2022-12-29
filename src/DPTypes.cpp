@@ -26,12 +26,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "DPTypes.hpp"
 
 void convRaw::encode(uint8_t* out, DPValue in) {
-  uint8_t tmp[MAX_DP_LENGTH] = { 0 };
+  uint8_t tmp[MAX_DP_LENGTH] = {0};
   in.getRaw(tmp);
   memcpy(out, tmp, _length);
 }
 DPValue convRaw::decode(const uint8_t* in) {
-  uint8_t tmp[MAX_DP_LENGTH] = { 0 };
+  uint8_t tmp[MAX_DP_LENGTH] = {0};
   memcpy(tmp, in, _length);
   DPValue out(tmp, _length);
   return out;
@@ -57,9 +57,7 @@ DPValue conv1_1_US::decode(const uint8_t* in) {
   return out;
 }
 
-void conv1_1_B::encode(uint8_t* out, DPValue in) {
-  out[0] = in.getBool() ? 0x01 : 0x00;
-}
+void conv1_1_B::encode(uint8_t* out, DPValue in) { out[0] = in.getBool() ? 0x01 : 0x00; }
 DPValue conv1_1_B::decode(const uint8_t* in) {
   DPValue out((*in) ? true : false);
   return out;
@@ -103,9 +101,7 @@ DPValue conv4_3600_F::decode(const uint8_t* in) {
   return out;
 }
 
-void conv1_10_F::encode(uint8_t* out, DPValue in) {
-  out[0] = floor((in.getFloat() * 10) + 0.5);
-}
+void conv1_10_F::encode(uint8_t* out, DPValue in) { out[0] = floor((in.getFloat() * 10) + 0.5); }
 DPValue conv1_10_F::decode(const uint8_t* in) {
   DPValue out(in[0] / 10.0f);
   return out;
@@ -134,14 +130,20 @@ void conv8_1_Timer::encode(uint8_t* out, DPValue in) {
   out[0] = tmp & 0xFF;
 }
 DPValue conv8_1_Timer::decode(const uint8_t* in) {
-  uint64_t tmp = ((uint64_t)in[7]) << 56 |
-                 ((uint64_t)in[6]) << 48 |
-                 ((uint64_t)in[5]) << 40 |
-                 ((uint64_t)in[4]) << 32 |
-                 ((uint64_t)in[3]) << 24 |
-                 ((uint64_t)in[2]) << 16 |
-                 ((uint64_t)in[1]) << 8 |
-                 in[0];
+  uint64_t tmp =
+      ((uint64_t)in[7]) << 56 | ((uint64_t)in[6]) << 48 | ((uint64_t)in[5]) << 40 | ((uint64_t)in[4]) << 32 | ((uint64_t)in[3]) << 24 | ((uint64_t)in[2]) << 16 | ((uint64_t)in[1]) << 8 | in[0];
   DPValue out(tmp);
+  return out;
+}
+
+void convErrHist::encode(uint8_t* out, DPValue in) {
+  // TODO convert out from UTC timestamp
+}
+DPValue convErrHist::decode(const uint8_t* in) {
+  uint8_t errCode = in[0];
+  uint64_t timeStamp =
+      // TODO convert timestamp to UTC timestamp
+      ((uint64_t)in[8]) << 56 | ((uint64_t)in[7]) << 48 | ((uint64_t)in[6]) << 40 | ((uint64_t)in[5]) << 32 | ((uint64_t)in[4]) << 24 | ((uint64_t)in[3]) << 16 | ((uint64_t)in[2]) << 8 | in[1];
+  DPValue out(errCode, timeStamp);
   return out;
 }

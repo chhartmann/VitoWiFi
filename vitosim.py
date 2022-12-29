@@ -1,12 +1,11 @@
 import serial
-ser = serial.Serial("/dev/ttyUSB0", 4800)
+ser = serial.Serial("/dev/ttyUSB0", baudrate=4800, parity=serial.PARITY_EVEN, stopbits=serial.STOPBITS_TWO)
 
 ret_vals = {}
-ret_vals["0800"] = bytes([0x12, 0x34]) #int(25).to_bytes(2, 'little')
-ret_vals["0812"] = int(26).to_bytes(2, 'little')
-ret_vals["2544"] = int(27).to_bytes(2, 'little')
-ret_vals["0808"] = int(28).to_bytes(2, 'little')
-ret_vals["555A"] = int(29).to_bytes(2, 'little')
+ret_vals["7507"] = bytes([0x00, 20, 22, 12, 28, 0, 9, 40, 10]) # error code, year, year, month, day, day of week, hour, minute, second
+ret_vals["0800"] = int(25*10).to_bytes(2, 'little')
+ret_vals["088A"] = int(100).to_bytes(4, 'little')
+ret_vals["08A2"] = int(1).to_bytes(1, 'little')
 
 def b2s(b):
   return ''.join(format(x, '02X') for x in b)
@@ -37,7 +36,7 @@ while (True):
       resp = bytes([0x41, len(ret_val) + 5, 0x01])
       resp += bytes([0, 0, 0, 0]) # is idnored by VitoFiFi
       resp += ret_val
-      resp += bytes([sum(resp[1:])])
+      resp += bytes([sum(resp[1:]) & 0xFF])
       print("response " + b2s(resp))
       ser.write(resp)
       ser.write(resp)

@@ -91,7 +91,7 @@ void OptolinkP300::loop() {
       _printer->println(F("read/write timeout"));
       _printer->print(F("RCVBUF "));
       _printHex(_printer, _rcvBuffer, _rcvBufferLen);
-      _printer->println();       
+      _printer->println();
     }
     _errorCode = 1;
     _setAction(RETURN_ERROR);
@@ -211,13 +211,11 @@ void OptolinkP300::_sendAckHandler() {
   if (_stream->available()) {
     uint8_t buff = _stream->read();
     if (buff == 0x06) {  // transmit succesful, moving to next state
-      if (_printer)
-        _printer->println(F("ack"));
+      if (_printer) _printer->println(F("ack"));
       _setState(RECEIVE);
       return;
     } else if (buff == 0x15) {  // transmit negatively acknowledged, return to IDLE
-      if (_printer)
-        _printer->println(F("nack"));
+      if (_printer) _printer->println(F("nack"));
       _errorCode = 1;
       _setAction(RETURN_ERROR);
       _setState(IDLE);
@@ -226,8 +224,7 @@ void OptolinkP300::_sendAckHandler() {
     }
   }
   if (millis() - _lastMillis > 1000UL) {  // if no ACK is coming, return to RESET
-    if (_printer)
-      _printer->println(F("timeout"));
+    if (_printer) _printer->println(F("timeout"));
     _errorCode = 1;
     _setAction(RETURN_ERROR);
     _setState(RESET);
@@ -240,8 +237,11 @@ void OptolinkP300::_receiveHandler() {
     _rcvBuffer[_rcvBufferLen] = _stream->read();
     ++_rcvBufferLen;
   }
-  if (_rcvBuffer[0] != 0x41) return;  // TODO(@bertmelis): find out why this is needed! I'd expect the rx-buffer to be empty.
-  if (_rcvBufferLen >= _rcvLen) {          // message complete, check message
+  if (_rcvBuffer[0] != 0x41) {
+    _rcvBufferLen = 0;  // dump unexpected data in buffer
+    return;             // TODO(@bertmelis): find out why this is needed! I'd expect the rx-buffer to be empty.
+  }
+  if (_rcvBufferLen == _rcvLen) {  // message complete, check message
     if (_printer) {
       _printer->print(F("RCV "));
       _printHex(_printer, _rcvBuffer, _rcvBufferLen);
@@ -250,22 +250,19 @@ void OptolinkP300::_receiveHandler() {
     if (_rcvBuffer[1] != (_rcvLen - 3)) {  // check for message length
       _errorCode = 4;
       _setState(RECEIVE_ACK);
-      if (_printer)
-        _printer->println(F("nack, length"));
+      if (_printer) _printer->println(F("nack, length"));
       return;
     }
     if (_rcvBuffer[2] != 0x01) {  // Vitotronic returns an error message
-      _errorCode = 3;  // Vitotronic error
+      _errorCode = 3;             // Vitotronic error
       _setState(RECEIVE_ACK);
-      if (_printer)
-        _printer->println(F("nack, comm error"));
+      if (_printer) _printer->println(F("nack, comm error"));
       return;
     }
     if (!_checkChecksum(_rcvBuffer, _rcvLen)) {  // checksum is wrong
       _errorCode = 2;
       _setState(RECEIVE_ACK);  // should we return NACK?
-      if (_printer)
-        _printer->println(F("nack, checksum"));
+      if (_printer) _printer->println(F("nack, checksum"));
       return;
     }
     if (_rcvBuffer[3] == 0x01) {
@@ -273,18 +270,16 @@ void OptolinkP300::_receiveHandler() {
     }
     _setState(RECEIVE_ACK);
     _errorCode = 0;
-    if (_printer)
-      _printer->println(F("ack"));
+    if (_printer) _printer->println(F("ack"));
     return;
   } else {
-    // wrong message length
+    // wrong length
   }
   if (millis() - _lastMillis > 1 * 1000UL) {  // Vitotronic isn't answering: 20 chars @ 4800baud < 1 sec!
-    _errorCode = 1;  // Connection error
+    _errorCode = 1;                           // Connection error
     _setAction(RETURN_ERROR);
     _setState(RESET);
-    if (_printer)
-      _printer->println(F("nack, timeout"));
+    if (_printer) _printer->println(F("nack, timeout"));
   }
 }
 
@@ -302,14 +297,10 @@ void OptolinkP300::_receiveAckHandler() {
 }
 
 // set properties for datapoint and move state to SEND
-bool OptolinkP300::readFromDP(uint16_t address, uint8_t length) {
-  return _transmit(address, length, false, nullptr);
-}
+bool OptolinkP300::readFromDP(uint16_t address, uint8_t length) { return _transmit(address, length, false, nullptr); }
 
 // set properties datapoint and move state to SEND
-bool OptolinkP300::writeToDP(uint16_t address, uint8_t length, uint8_t value[]) {
-  return _transmit(address, length, true, value);
-}
+bool OptolinkP300::writeToDP(uint16_t address, uint8_t length, uint8_t value[]) { return _transmit(address, length, true, value); }
 
 bool OptolinkP300::_transmit(uint16_t address, uint8_t length, bool write, uint8_t value[]) {
   if (_action != WAIT) {
@@ -389,9 +380,7 @@ inline void OptolinkP300::_clearInputBuffer() {
   }
 }
 
-void OptolinkP300::setLogger(Print* printer) {
-  _printer = printer;
-}
+void OptolinkP300::setLogger(Print* printer) { _printer = printer; }
 
 // Copied from Arduino.cc forum --> (C) robtillaart
 inline void OptolinkP300::_printHex(Print* printer, uint8_t array[], uint8_t length) {

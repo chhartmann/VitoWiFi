@@ -14,9 +14,10 @@ globalCallback uses value.getString(char*,size_t). This method is independent of
 
 VitoWiFi_setProtocol(P300);
 
-// DPTemp outsideTemp("outsideTemp", "boiler", 0x5525);
 DPTemp boilerTemp("boilertemp", "boiler", 0x0800);
-// DPStat pumpStat("pump", "heating1", 0x2906);
+DPCount startsBrenner("pump", "burner", 0x088A);
+DPByte statusStoerung("Status", "status", 0x08A2);
+DPErrHist stoerung1("Stoerung-History1", "error-history", 0x7507);
 
 void tempCallbackHandler(const IDatapoint& dp, DPValue value) {
   Serial1.print(dp.getGroup());
@@ -31,24 +32,26 @@ void globalCallbackHandler(const IDatapoint& dp, DPValue value) {
   Serial1.print(" - ");
   Serial1.print(dp.getName());
   Serial1.print(" is ");
-  char value_str[15] = {0};
+  char value_str[25] = {0};
   value.getString(value_str, sizeof(value_str));
   Serial1.println(value_str);
 }
 
 void setup() {
   //  outsideTemp.setCallback(tempCallbackHandler);
-  boilerTemp.setCallback(tempCallbackHandler);
+  //  boilerTemp.setCallback(tempCallbackHandler);
   VitoWiFi.setGlobalCallback(globalCallbackHandler);  // this callback will be used for all DPs without specific callback
                                                       // must be set after adding at least 1 datapoint
   VitoWiFi.setup(&Serial);
   Serial1.begin(115200);
   Serial1.println(F("Setup finished..."));
+  VitoWiFi.setLogger(&Serial1);
+  VitoWiFi.enableLogger();
 }
 
 void loop() {
   static unsigned long lastMillis = 0;
-  if (millis() - lastMillis > 60 * 1000UL) {  // read all values every 60 seconds
+  if (millis() - lastMillis > 30 * 1000UL) {  // read all values every 60 seconds
     lastMillis = millis();
     VitoWiFi.readAll();
   }

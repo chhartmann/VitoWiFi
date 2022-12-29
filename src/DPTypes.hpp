@@ -25,12 +25,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #pragma once
 
+#include <math.h>  // floor()
 #include <stdint.h>
 #include <stdio.h>
-#include <math.h>  // floor()
 #include <string.h>
-#include "DPValue.hpp"
 #include "Constants.hpp"
+#include "DPValue.hpp"
 
 // Encoding
 
@@ -50,6 +50,7 @@ class DPType {
   DPType() : _length(0) {}
   void setLength(size_t length) { _length = length; }
   virtual const size_t getLength() const { return _length; }
+
  protected:
   size_t _length;
 };
@@ -122,4 +123,11 @@ class conv8_1_Timer : public DPType {
   void encode(uint8_t* out, DPValue in);
   DPValue decode(const uint8_t* in);
   const size_t getLength() const { return 8; }
+};
+
+class convErrHist : public DPType {
+ public:
+  void encode(uint8_t* out, DPValue in);
+  DPValue decode(const uint8_t* in);
+  const size_t getLength() const { return 9; }
 };

@@ -28,14 +28,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // #include <stdint.h>
 // #include <stdio.h>
 #include <string.h>  // for strcmp()
-#include <functional>
-#include <vector>
-#include <memory>
 #include <algorithm>
+#include <functional>
+#include <memory>
+#include <vector>
+#include "Constants.hpp"
 #include "DPTypes.hpp"
 #include "DPValue.hpp"
-#include "Constants.hpp"
-
 
 // callback and forward declares
 class IDatapoint;
@@ -43,7 +42,8 @@ typedef std::function<void(const IDatapoint&, DPValue)> Callback;
 
 // Datapoints
 class IDatapoint {
-  template<class> friend class VitoWiFiClass;
+  template <class>
+  friend class VitoWiFiClass;
 
  public:
   IDatapoint(const char* name, const char* group, uint16_t address, bool writeable = false);
@@ -51,11 +51,23 @@ class IDatapoint {
   const char* getName() const { return _name; }
   const char* getGroup() const { return _group; }
   const uint16_t getAddress() const { return _address; }
-  IDatapoint& setAddress(uint16_t address) { _address = address; return *this; }
+  IDatapoint& setAddress(uint16_t address) {
+    _address = address;
+    return *this;
+  }
   const bool isWriteable() const { return _writeable; }
-  IDatapoint& setWriteable(bool writeable) { _writeable = writeable; return *this; }
-  IDatapoint& setGlobalCallback(Callback cb) { _globalCb = cb; return *this; }
-  IDatapoint& setCallback(Callback cb) { _cb = cb; return *this; }
+  IDatapoint& setWriteable(bool writeable) {
+    _writeable = writeable;
+    return *this;
+  }
+  IDatapoint& setGlobalCallback(Callback cb) {
+    _globalCb = cb;
+    return *this;
+  }
+  IDatapoint& setCallback(Callback cb) {
+    _cb = cb;
+    return *this;
+  }
   virtual const size_t getLength() const = 0;
   virtual IDatapoint& setLength(uint8_t length) = 0;
   virtual void encode(uint8_t* out, const DPValue in) = 0;
@@ -79,26 +91,28 @@ class IDatapoint {
 template <class T>
 class Datapoint : public IDatapoint {
  public:
-  Datapoint(const char* name, const char* group, uint16_t address, bool writeable = false) :
-    IDatapoint(name, group, address, writeable) {}
+  Datapoint(const char* name, const char* group, uint16_t address, bool writeable = false) : IDatapoint(name, group, address, writeable) {}
 
  protected:
   T _t;
 
  public:
   const size_t getLength() const { return _t.getLength(); }
-  IDatapoint& setLength(uint8_t length) { _t.setLength(length); return *this; }
-  void encode(uint8_t* out, const DPValue in)  { _t.encode(out, in); }
+  IDatapoint& setLength(uint8_t length) {
+    _t.setLength(length);
+    return *this;
+  }
+  void encode(uint8_t* out, const DPValue in) { _t.encode(out, in); }
   DPValue decode(const uint8_t* in) { return _t.decode(in); }
 };
 
 typedef Datapoint<convRaw> DPRaw;
 typedef Datapoint<conv2_10_F> DPTemp;
-typedef Datapoint<conv1_1_US> DPTempS;
+typedef Datapoint<conv1_1_US> DPByte;
 typedef Datapoint<conv1_1_B> DPStat;
 typedef Datapoint<conv4_1_UL> DPCount;
 typedef Datapoint<conv2_1_UL> DPCountS;
-typedef DPTempS DPMode;
 typedef Datapoint<conv4_3600_F> DPHours;
 typedef Datapoint<conv1_10_F> DPCoP;
 typedef Datapoint<conv8_1_Timer> DPTimer;
+typedef Datapoint<convErrHist> DPErrHist;

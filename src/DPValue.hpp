@@ -32,33 +32,53 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <string.h>
 #include "Constants.hpp"
 
-enum DPValueType {
-  BOOL,
-  UINT8_T,
-  UINT16_T,
-  UINT32_T,
-  UINT64_T,
-  FLOAT,
-  PTR
-};
+enum DPValueType { BOOL, UINT8_T, UINT16_T, UINT32_T, UINT64_T, FLOAT, PTR, ERR_HIST_T };
 
 // class which holds the returned or set value
 class DPValue {
  private:
   union value {
-    struct b_t { DPValueType type; bool value; } b;
-    struct u8_t { DPValueType type; uint8_t value; } u8;
-    struct u16_t { DPValueType type; uint16_t value; } u16;
-    struct u32_t { DPValueType type; uint32_t value; } u32;
-    struct u64_t { DPValueType type; uint64_t value; } u64;
-    struct f_t { DPValueType type; float value; } f;
-    struct raw { DPValueType type; uint8_t value[MAX_DP_LENGTH]; size_t length; } raw;
+    struct b_t {
+      DPValueType type;
+      bool value;
+    } b;
+    struct u8_t {
+      DPValueType type;
+      uint8_t value;
+    } u8;
+    struct u16_t {
+      DPValueType type;
+      uint16_t value;
+    } u16;
+    struct u32_t {
+      DPValueType type;
+      uint32_t value;
+    } u32;
+    struct u64_t {
+      DPValueType type;
+      uint64_t value;
+    } u64;
+    struct errHist_t {
+      DPValueType type;
+      uint8_t errCode;
+      uint64_t timeStamp;
+    } errHist;
+    struct f_t {
+      DPValueType type;
+      float value;
+    } f;
+    struct raw {
+      DPValueType type;
+      uint8_t value[MAX_DP_LENGTH];
+      size_t length;
+    } raw;
     // value() : u32{PTR, 0} {}
     value(bool b) : b{BOOL, b} {}
     value(uint8_t u8) : u8{UINT8_T, u8} {}
     value(uint16_t u16) : u16{UINT16_T, u16} {}
     value(uint32_t u32) : u32{UINT32_T, u32} {}
     value(uint64_t u64) : u64{UINT64_T, u64} {}
+    value(uint8_t u8, uint64_t u64) : errHist{ERR_HIST_T, u8, u64} {}
     value(float f) : f{FLOAT, f} {}
     value(uint8_t* r, size_t length) : raw{PTR, {0}, length} {
       if (length <= MAX_DP_LENGTH)
@@ -75,6 +95,7 @@ class DPValue {
   explicit DPValue(uint16_t u16) : v(u16) {}
   explicit DPValue(uint32_t u32) : v(u32) {}
   explicit DPValue(uint64_t u64) : v(u64) {}
+  explicit DPValue(uint8_t u8, uint64_t u64) : v(u8, u64) {}
   explicit DPValue(float f) : v(f) {}
   DPValue(uint8_t* r, size_t length) : v(r, length) {}
   DPValue(DPValue const&) = default;
@@ -125,30 +146,35 @@ class DPValue {
   size_t getRawLength() { return v.raw.length; }
   void getString(char* c, size_t s) {
     switch (v.b.type) {
-    case BOOL:
-      snprintf(c, s, "%s", (v.b.value) ? "true" : "false");
-      break;
-    case UINT8_T:
-      snprintf(c, s, "%u", v.u8.value);
-      break;
-    case UINT16_T:
-      snprintf(c, s, "%u", v.u16.value);
-      break;
-    case UINT32_T:
-      snprintf(c, s, "%u", v.u32.value);
-      break;
-    case UINT64_T:
-      snprintf(c, s, "%llu", v.u64.value);
-      break;
-    case FLOAT:
-      snprintf(c, s, "%.1f", v.f.value);
-      break;
-    case PTR:
-      for (uint8_t i = 0; i < v.raw.length; ++i) {
-        snprintf(c, s, "%02x", v.raw.value[i]);
-        c+=2;
-      }
-      break;
+      case BOOL:
+        snprintf(c, s, "%s", (v.b.value) ? "true" : "false");
+        break;
+      case UINT8_T:
+        snprintf(c, s, "%u", v.u8.value);
+        break;
+      case UINT16_T:
+        snprintf(c, s, "%u", v.u16.value);
+        break;
+      case UINT32_T:
+        snprintf(c, s, "%u", v.u32.value);
+        break;
+      case UINT64_T:
+        snprintf(c, s, "%llu", v.u64.value);
+        break;
+      case FLOAT:
+        snprintf(c, s, "%.1f", v.f.value);
+        break;
+      case PTR:
+        for (uint8_t i = 0; i < v.raw.length; ++i) {
+          snprintf(c, s, "%02x", v.raw.value[i]);
+          c += 2;
+        }
+        break;
+      case ERR_HIST_T:
+        // TODO get error code as string
+        // TODO decode timestamp to string
+        snprintf(c, s, "Code %u Timestamp %llu", v.errHist.errCode, v.errHist.timeStamp);
+        break;
     }
   }
 };

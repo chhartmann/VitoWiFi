@@ -28,9 +28,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "VitoWiFi.hpp"
 
 template <class P>
-VitoWiFiClass<P>::VitoWiFiClass() :
-  _enablePrinter(false),
-  _printer(nullptr) {}
+VitoWiFiClass<P>::VitoWiFiClass() : _enablePrinter(false), _printer(nullptr) {}
 
 template <class P>
 VitoWiFiClass<P>::~VitoWiFiClass() {
@@ -92,7 +90,7 @@ void VitoWiFiClass<P>::_readDatapoint(IDatapoint* dp, void* arg) {
     }
   } else {
     if (_enablePrinter && _printer) {
-      _printer->print("queue full");
+      _printer->println("queue full");
     }
   }
 }
@@ -100,8 +98,7 @@ void VitoWiFiClass<P>::_readDatapoint(IDatapoint* dp, void* arg) {
 template <class P>
 void VitoWiFiClass<P>::_writeDatapoint(IDatapoint* dp, DPValue value, void* arg) {
   if (!dp->isWriteable()) {
-    if (_enablePrinter && _printer)
-      _printer->println("DP is readonly, skipping");
+    if (_enablePrinter && _printer) _printer->println("DP is readonly, skipping");
     return;
   }
   if (_queue.size() < (IDatapoint::_dps.size() * 2)) {
@@ -112,7 +109,7 @@ void VitoWiFiClass<P>::_writeDatapoint(IDatapoint* dp, DPValue value, void* arg)
     _queue.push(action);
   } else {
     if (_enablePrinter && _printer) {
-      _printer->print("queue full");
+      _printer->println("queue full");
     }
   }
 }
@@ -132,7 +129,7 @@ void VitoWiFiClass<P>::loop() {
     if (_enablePrinter && _printer) {
       _printer->print("DP ");
       _printer->print(_queue.front().DP->getName());
-      _printer->println(" succes");
+      _printer->println(" success");
     }
     uint8_t value_enc[MAX_DP_LENGTH] = {0};
     _optolink.read(value_enc);
