@@ -2,7 +2,7 @@ import serial
 ser = serial.Serial("/dev/ttyUSB0", baudrate=4800, parity=serial.PARITY_EVEN, stopbits=serial.STOPBITS_TWO)
 
 ret_vals = {}
-ret_vals["7507"] = bytes([0x00, 20, 22, 12, 28, 0, 9, 40, 10]) # error code, year, year, month, day, day of week, hour, minute, second
+ret_vals["7507"] = bytes([0x20, 20, 22, 12, 28, 0, 9, 40, 10]) # error code, year, year, month, day, day of week, hour, minute, second
 ret_vals["0800"] = int(25*10).to_bytes(2, 'little')
 ret_vals["088A"] = int(100).to_bytes(4, 'little')
 ret_vals["08A2"] = int(1).to_bytes(1, 'little')

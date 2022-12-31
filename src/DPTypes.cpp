@@ -137,13 +137,19 @@ DPValue conv8_1_Timer::decode(const uint8_t* in) {
 }
 
 void convErrHist::encode(uint8_t* out, DPValue in) {
-  // TODO convert out from UTC timestamp
+  // not needed
 }
 DPValue convErrHist::decode(const uint8_t* in) {
   uint8_t errCode = in[0];
-  uint64_t timeStamp =
-      // TODO convert timestamp to UTC timestamp
-      ((uint64_t)in[8]) << 56 | ((uint64_t)in[7]) << 48 | ((uint64_t)in[6]) << 40 | ((uint64_t)in[5]) << 32 | ((uint64_t)in[4]) << 24 | ((uint64_t)in[3]) << 16 | ((uint64_t)in[2]) << 8 | in[1];
+  struct tm tmp;
+  tmp.tm_isdst = -1;
+  tmp.tm_hour = in[6];
+  tmp.tm_min = in[7];
+  tmp.tm_sec = in[8];
+  tmp.tm_year = (uint32_t(in[1]) * 100 + uint32_t(in[2])) - 1900;
+  tmp.tm_mon = in[3] - 1;
+  tmp.tm_mday = in[4];
+  time_t timeStamp = mktime(&tmp);
   DPValue out(errCode, timeStamp);
   return out;
 }

@@ -32,8 +32,8 @@ void globalCallbackHandler(const IDatapoint& dp, DPValue value) {
   Serial1.print(" - ");
   Serial1.print(dp.getName());
   Serial1.print(" is ");
-  char value_str[25] = {0};
-  value.getString(value_str, sizeof(value_str));
+  char value_str[128] = {0};
+  value.getString(value_str, sizeof(value_str) - 1);
   Serial1.println(value_str);
 }
 

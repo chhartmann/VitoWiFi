@@ -30,9 +30,90 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // #include <memory>
 // #include <algorithm>
 #include <string.h>
+#include <time.h>
 #include "Constants.hpp"
+#include "HardwareSerial.h"
 
 enum DPValueType { BOOL, UINT8_T, UINT16_T, UINT32_T, UINT64_T, FLOAT, PTR, ERR_HIST_T };
+
+struct errCode2errStr_t {
+  char code;
+  const char* str;
+};
+
+const char errStr20[] PROGMEM = "Kurzschluss Vorlauftemperatursensor";
+const char errStr10[] PROGMEM = "Kurzschluss Außentemperatursensor";
+const char errStr21[] PROGMEM = "Kurzschluss Ruecklauftemperatursensor";
+const char errStr18[] PROGMEM = "Unterbrechung Außentemperatursensor";
+const char errStr28[] PROGMEM = "Unterbrechung Außentemperatursensor";
+const char errStr29[] PROGMEM = "Unterbrechung Ruecklauftemperatursensor";
+const char errStr30[] PROGMEM = "Kurzschluss Kesseltemperatursensor";
+const char errStr38[] PROGMEM = "Unterbrechung Kesseltemperatursensor";
+const char errStr0F[] PROGMEM = "Wartung (fuer Reset Codieradresse 24 auf 0 stellen)";
+const char errStr40[] PROGMEM = "Kurzschluss Vorlauftemperatursensor M2";
+const char errStr42[] PROGMEM = "Unterbrechung Vorlauftemperatursensor M2";
+const char errStr50[] PROGMEM = "Kurzschluss Speichertemperatursensor";
+const char errStr58[] PROGMEM = "Unterbrechung Speichertemperatursensor";
+const char errStr92[] PROGMEM = "Solar: Kurzschluss Kollektortemperatursensor";
+const char errStr93[] PROGMEM = "Solar: Kurzschluss Sensor S3";
+const char errStr94[] PROGMEM = "Solar: Kurzschluss Speichertemperatursensor";
+const char errStr9A[] PROGMEM = "Solar: Unterbrechung Kollektortemperatursensor";
+const char errStr9B[] PROGMEM = "Solar: Unterbrechung Sensor S3";
+const char errStr9C[] PROGMEM = "Solar: Unterbrechung Speichertemperatursensor";
+const char errStr9F[] PROGMEM = "Solar: Fehlermeldung Solarteil (siehe Solarregler)";
+const char errStrA7[] PROGMEM = "Bedienteil defekt";
+const char errStrB0[] PROGMEM = "Kurzschluss Abgastemperatursensor";
+const char errStrB1[] PROGMEM = "Kommunikationsfehler Bedieneinheit";
+const char errStrB4[] PROGMEM = "Interner Fehler (Elektronik)";
+const char errStrB5[] PROGMEM = "Interner Fehler (Elektronik)";
+const char errStrB6[] PROGMEM = "Ungueltige Hardwarekennung (Elektronik)";
+const char errStrB7[] PROGMEM = "Interner Fehler (Kesselkodierstecker)";
+const char errStrB8[] PROGMEM = "Unterbrechung Abgastemperatursensor";
+const char errStrB9[] PROGMEM = "Interner Fehler (Dateneingabe wiederholen)";
+const char errStrBA[] PROGMEM = "Kommunikationsfehler Erweiterungssatz fuer Mischerkreis M2";
+const char errStrBC[] PROGMEM = "Kommunikationsfehler Fernbedienung Vitorol, Heizkreis M1";
+const char errStrBD[] PROGMEM = "Kommunikationsfehler Fernbedienung Vitorol, Heizkreis M2";
+const char errStrBE[] PROGMEM = "Falsche Codierung Fernbedienung Vitorol";
+const char errStrC1[] PROGMEM = "Externe Sicherheitseinrichtung (Kessel kuehlt aus)";
+const char errStrC2[] PROGMEM = "Kommunikationsfehler Solarregelung";
+const char errStrC5[] PROGMEM = "Kommunikationsfehler drehzahlgeregelte Heizkreispumpe, Heizkreis M1";
+const char errStrC6[] PROGMEM = "Kommunikationsfehler drehzahlgeregelte Heizkreispumpe, Heizkreis M2";
+const char errStrC7[] PROGMEM = "Falsche Codierung der Heizkreispumpe";
+const char errStrC9[] PROGMEM = "Stoermeldeeingang am Schaltmodul-V aktiv";
+const char errStrCD[] PROGMEM = "Kommunikationsfehler Vitocom 100 (KM-BUS)";
+const char errStrCE[] PROGMEM = "Kommunikationsfehler Schaltmodul-V";
+const char errStrCF[] PROGMEM = "Kommunikationsfehler LON Modul";
+const char errStrD1[] PROGMEM = "Brennerstoerung";
+const char errStrD4[] PROGMEM = "Sicherheitstemperaturbegrenzer hat ausgeloest oder Stoermeldemodul nicht richtig gesteckt";
+const char errStrDA[] PROGMEM = "Kurzschluss Raumtemperatursensor, Heizkreis M1";
+const char errStrDB[] PROGMEM = "Kurzschluss Raumtemperatursensor, Heizkreis M2";
+const char errStrDD[] PROGMEM = "Unterbrechung Raumtemperatursensor, Heizkreis M1";
+const char errStrDE[] PROGMEM = "Unterbrechung Raumtemperatursensor, Heizkreis M2";
+const char errStrE4[] PROGMEM = "Fehler Versorgungsspannung";
+const char errStrE5[] PROGMEM = "Interner Fehler (Ionisationselektrode)";
+const char errStrE6[] PROGMEM = "Abgas- / Zuluftsystem verstopft";
+const char errStrE9[] PROGMEM = "Ionisationsstrom waehrend des Kalibrierens nicht im gueltigen Bereich";
+const char errStrF0[] PROGMEM = "Interner Fehler (Regelung tauschen)";
+const char errStrF1[] PROGMEM = "Abgastemperaturbegrenzer ausgeloest";
+const char errStrF2[] PROGMEM = "Temperaturbegrenzer ausgeloest";
+const char errStrF3[] PROGMEM = "Flammensigal beim Brennerstart bereits vorhanden";
+const char errStrF4[] PROGMEM = "Flammensigal nicht vorhanden";
+const char errStrF7[] PROGMEM = "Differenzdrucksensor defekt";
+const char errStrF8[] PROGMEM = "Brennstoffventil schließt zu spaet";
+const char errStrF9[] PROGMEM = "Geblaesedrehzahl beim Brennerstart zu niedrig";
+const char errStrFA[] PROGMEM = "Geblaesestillstand nicht erreicht";
+const char errStrFD[] PROGMEM = "Fehler Gasfeurungsautomat";
+const char errStrFE[] PROGMEM = "Starkes Stoerfeld (EMV) in der Naehe oder Elektronik defekt";
+const char errStrFF[] PROGMEM = "Starkes Stoerfeld (EMV) in der Naehe oder interner Fehler";
+
+const errCode2errStr_t errCode2errStr[] PROGMEM = {{0x20, errStr20}, {0x10, errStr10}, {0x21, errStr21}, {0x18, errStr18}, {0x28, errStr28}, {0x29, errStr29}, {0x30, errStr30}, {0x38, errStr38},
+                                                   {0x0F, errStr0F}, {0x40, errStr40}, {0x42, errStr42}, {0x50, errStr50}, {0x58, errStr58}, {0x92, errStr92}, {0x93, errStr93}, {0x94, errStr94},
+                                                   {0x9A, errStr9A}, {0x9B, errStr9B}, {0x9C, errStr9C}, {0x9F, errStr9F}, {0xA7, errStrA7}, {0xB0, errStrB0}, {0xB1, errStrB1}, {0xB4, errStrB4},
+                                                   {0xB5, errStrB5}, {0xB6, errStrB6}, {0xB7, errStrB7}, {0xB8, errStrB8}, {0xB9, errStrB9}, {0xBA, errStrBA}, {0xBC, errStrBC}, {0xBD, errStrBD},
+                                                   {0xBE, errStrBE}, {0xC1, errStrC1}, {0xC2, errStrC2}, {0xC5, errStrC5}, {0xC6, errStrC6}, {0xC7, errStrC7}, {0xC9, errStrC9}, {0xCD, errStrCD},
+                                                   {0xCE, errStrCE}, {0xCF, errStrCF}, {0xD1, errStrD1}, {0xD4, errStrD4}, {0xDA, errStrDA}, {0xDB, errStrDB}, {0xDD, errStrDD}, {0xDE, errStrDE},
+                                                   {0xE4, errStrE4}, {0xE5, errStrE5}, {0xE6, errStrE6}, {0xE9, errStrE9}, {0xF0, errStrF0}, {0xF1, errStrF1}, {0xF2, errStrF2}, {0xF3, errStrF3},
+                                                   {0xF4, errStrF4}, {0xF7, errStrF7}, {0xF8, errStrF8}, {0xF9, errStrF9}, {0xFA, errStrFA}, {0xFD, errStrFD}, {0xFE, errStrFE}, {0xFF, errStrFF}};
 
 // class which holds the returned or set value
 class DPValue {
@@ -61,7 +142,7 @@ class DPValue {
     struct errHist_t {
       DPValueType type;
       uint8_t errCode;
-      uint64_t timeStamp;
+      time_t timeStamp;
     } errHist;
     struct f_t {
       DPValueType type;
@@ -78,7 +159,7 @@ class DPValue {
     value(uint16_t u16) : u16{UINT16_T, u16} {}
     value(uint32_t u32) : u32{UINT32_T, u32} {}
     value(uint64_t u64) : u64{UINT64_T, u64} {}
-    value(uint8_t u8, uint64_t u64) : errHist{ERR_HIST_T, u8, u64} {}
+    value(uint8_t u8, time_t t) : errHist{ERR_HIST_T, u8, t} {}
     value(float f) : f{FLOAT, f} {}
     value(uint8_t* r, size_t length) : raw{PTR, {0}, length} {
       if (length <= MAX_DP_LENGTH)
@@ -166,14 +247,24 @@ class DPValue {
         break;
       case PTR:
         for (uint8_t i = 0; i < v.raw.length; ++i) {
-          snprintf(c, s, "%02x", v.raw.value[i]);
+          snprintf(c, s - 2 * i, "%02x", v.raw.value[i]);
           c += 2;
         }
         break;
       case ERR_HIST_T:
-        // TODO get error code as string
-        // TODO decode timestamp to string
-        snprintf(c, s, "Code %u Timestamp %llu", v.errHist.errCode, v.errHist.timeStamp);
+        struct tm* tms = gmtime(&v.errHist.timeStamp);
+        char ts[20] = {0};
+        strftime(ts, sizeof(ts), "%d.%m.%Y %H:%M:%S", tms);
+        size_t index = snprintf(c, s, "%s Fehler %02x ", ts, v.errHist.errCode);
+
+        for (uint32_t i = 0; i < sizeof(errCode2errStr) / sizeof(errCode2errStr[0]); ++i) {
+          errCode2errStr_t tmp;
+          memcpy_P(&tmp, &errCode2errStr[i], sizeof(errCode2errStr_t));
+          if (tmp.code == v.errHist.errCode) {
+            strncat_P(c + index, tmp.str, s - index);
+            break;
+          }
+        }
         break;
     }
   }
