@@ -137,8 +137,19 @@ DPValue conv8_1_Timer::decode(const uint8_t* in) {
 }
 
 void convTimeStamp::encode(uint8_t* out, DPValue in) {
-  // TODO
+  time_t t = in.getTimeStamp();
+  struct tm* tmp = gmtime(&t);
+
+  out[7] = tmp->tm_sec;
+  out[6] = tmp->tm_min;
+  out[5] = tmp->tm_hour;
+  out[4] = tmp->tm_wday;
+  out[3] = tmp->tm_mday;
+  out[2] = tmp->tm_mon + 1;
+  out[1] = (tmp->tm_year + 1900) % 100;
+  out[0] = (u_int8_t)((tmp->tm_year + 1900) / 100);
 }
+
 DPValue convTimeStamp::decode(const uint8_t* in) {
   struct tm tmp;
   tmp.tm_isdst = -1;
