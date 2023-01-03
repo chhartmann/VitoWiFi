@@ -136,20 +136,30 @@ DPValue conv8_1_Timer::decode(const uint8_t* in) {
   return out;
 }
 
+void convTimeStamp::encode(uint8_t* out, DPValue in) {
+  // TODO
+}
+DPValue convTimeStamp::decode(const uint8_t* in) {
+  struct tm tmp;
+  tmp.tm_isdst = -1;
+  tmp.tm_hour = in[5];
+  tmp.tm_min = in[6];
+  tmp.tm_sec = in[7];
+  tmp.tm_year = (uint32_t(in[0]) * 100 + uint32_t(in[1])) - 1900;
+  tmp.tm_mon = in[2] - 1;
+  tmp.tm_mday = in[3];
+  time_t timeStamp = mktime(&tmp);
+  DPValue out(timeStamp);
+  return out;
+}
+
 void convErrHist::encode(uint8_t* out, DPValue in) {
   // not needed
 }
 DPValue convErrHist::decode(const uint8_t* in) {
+  convTimeStamp tsConv;
+  DPValue ts = tsConv.decode(in + 1);
   uint8_t errCode = in[0];
-  struct tm tmp;
-  tmp.tm_isdst = -1;
-  tmp.tm_hour = in[6];
-  tmp.tm_min = in[7];
-  tmp.tm_sec = in[8];
-  tmp.tm_year = (uint32_t(in[1]) * 100 + uint32_t(in[2])) - 1900;
-  tmp.tm_mon = in[3] - 1;
-  tmp.tm_mday = in[4];
-  time_t timeStamp = mktime(&tmp);
-  DPValue out(errCode, timeStamp);
+  DPValue out(errCode, ts.getTimeStamp());
   return out;
 }

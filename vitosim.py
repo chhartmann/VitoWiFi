@@ -6,6 +6,7 @@ ret_vals["7507"] = bytes([0x20, 20, 22, 12, 28, 0, 9, 40, 10]) # error code, yea
 ret_vals["0800"] = int(25*10).to_bytes(2, 'little')
 ret_vals["088A"] = int(100).to_bytes(4, 'little')
 ret_vals["08A2"] = int(1).to_bytes(1, 'little')
+ret_vals["088E"] = bytes([20, 22, 12, 28, 0, 9, 40, 10])
 
 def b2s(b):
   return ''.join(format(x, '02X') for x in b)

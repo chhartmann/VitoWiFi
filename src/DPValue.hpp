@@ -34,7 +34,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Constants.hpp"
 #include "HardwareSerial.h"
 
-enum DPValueType { BOOL, UINT8_T, UINT16_T, UINT32_T, UINT64_T, FLOAT, PTR, ERR_HIST_T };
+enum DPValueType { BOOL, UINT8_T, UINT16_T, UINT32_T, UINT64_T, FLOAT, PTR, TIMESTAMP_T, ERR_HIST_T };
 
 struct errCode2errStr_t {
   char code;
@@ -139,10 +139,13 @@ class DPValue {
       DPValueType type;
       uint64_t value;
     } u64;
-    struct errHist_t {
+    struct timestamp_t {
       DPValueType type;
-      uint8_t errCode;
       time_t timeStamp;
+    } timestamp;
+
+    struct errHist_t : timestamp_t {
+      uint8_t errCode;
     } errHist;
     struct f_t {
       DPValueType type;
@@ -159,7 +162,8 @@ class DPValue {
     value(uint16_t u16) : u16{UINT16_T, u16} {}
     value(uint32_t u32) : u32{UINT32_T, u32} {}
     value(uint64_t u64) : u64{UINT64_T, u64} {}
-    value(uint8_t u8, time_t t) : errHist{ERR_HIST_T, u8, t} {}
+    value(time_t t) : timestamp{TIMESTAMP_T, t} {}
+    value(uint8_t u8, time_t t) : errHist{ERR_HIST_T, t, u8} {}
     value(float f) : f{FLOAT, f} {}
     value(uint8_t* r, size_t length) : raw{PTR, {0}, length} {
       if (length <= MAX_DP_LENGTH)
@@ -176,7 +180,8 @@ class DPValue {
   explicit DPValue(uint16_t u16) : v(u16) {}
   explicit DPValue(uint32_t u32) : v(u32) {}
   explicit DPValue(uint64_t u64) : v(u64) {}
-  explicit DPValue(uint8_t u8, uint64_t u64) : v(u8, u64) {}
+  explicit DPValue(time_t t) : v(t) {}
+  explicit DPValue(uint8_t u8, time_t u64) : v(u8, u64) {}
   explicit DPValue(float f) : v(f) {}
   DPValue(uint8_t* r, size_t length) : v(r, length) {}
   DPValue(DPValue const&) = default;
@@ -223,6 +228,12 @@ class DPValue {
       return 0.0;
     }
   }
+  time_t getTimeStamp() {
+    if (v.b.type == ERR_HIST_T || v.b.type == TIMESTAMP_T) {
+      return v.timestamp.timeStamp;
+    } else
+      return 0;
+  }
   void getRaw(uint8_t* out) { memcpy(out, &v.raw.value[0], v.raw.length); }
   size_t getRawLength() { return v.raw.length; }
   void getString(char* c, size_t s) {
@@ -251,7 +262,11 @@ class DPValue {
           c += 2;
         }
         break;
-      case ERR_HIST_T:
+      case TIMESTAMP_T: {
+        struct tm* tms = gmtime(&v.timestamp.timeStamp);
+        strftime(c, s, "%d.%m.%Y %H:%M:%S", tms);
+      } break;
+      case ERR_HIST_T: {
         struct tm* tms = gmtime(&v.errHist.timeStamp);
         char ts[20] = {0};
         strftime(ts, sizeof(ts), "%d.%m.%Y %H:%M:%S", tms);
@@ -265,7 +280,7 @@ class DPValue {
             break;
           }
         }
-        break;
+      } break;
     }
   }
 };
