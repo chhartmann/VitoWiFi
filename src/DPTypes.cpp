@@ -174,3 +174,31 @@ DPValue convErrHist::decode(const uint8_t* in) {
   DPValue out(errCode, ts.getTimeStamp());
   return out;
 }
+
+void convCycleTime::encode(uint8_t* out, DPValue in) {
+  // TODO
+}
+
+DPValue convCycleTime::decode(const uint8_t* in) {
+  cycletime_s ct;
+  for (uint32_t i = 0; i < 4; ++i) {
+    uint8_t from = in[i * 2];
+    uint8_t till = in[i * 2 + 1];
+    if (from == 0xff) {
+      ct.cycle[i].from_hour = 0xff;
+      ct.cycle[i].from_minute = 0xff;
+    } else {
+      ct.cycle[i].from_hour = (from & 0xf8) >> 3;
+      ct.cycle[i].from_minute = (from & 7) * 10;
+    }
+    if (till == 0xff) {
+      ct.cycle[i].till_hour = 0xff;
+      ct.cycle[i].till_minute = 0xff;
+    } else {
+      ct.cycle[i].till_hour = (till & 0xf8) >> 3;
+      ct.cycle[i].till_minute = (till & 7) * 10;
+    }
+  }
+  DPValue out(ct);
+  return out;
+}

@@ -19,6 +19,7 @@ DPCount startsBrenner("pump", "burner", 0x088A);
 DPByte statusStoerung("Status", "status", 0x08A2);
 DPErrHist stoerung1("Stoerung-History1", "error-history", 0x7507);
 DPTimeStamp systemzeit("Systemzeit", "time", 0x088E);
+DPCycleTime timerMoHeizen("TimerMoHeizen", "timer-heating", 0x2000);
 
 void tempCallbackHandler(const IDatapoint& dp, DPValue value) {
   Serial1.print(dp.getGroup());

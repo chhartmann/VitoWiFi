@@ -116,3 +116,4 @@ typedef Datapoint<conv4_3600_F> DPHours;
 typedef Datapoint<conv1_10_F> DPCoP;
 typedef Datapoint<convTimeStamp> DPTimeStamp;
 typedef Datapoint<convErrHist> DPErrHist;
+typedef Datapoint<convCycleTime> DPCycleTime;

@@ -34,7 +34,16 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "Constants.hpp"
 #include "HardwareSerial.h"
 
-enum DPValueType { BOOL, UINT8_T, UINT16_T, UINT32_T, UINT64_T, FLOAT, PTR, TIMESTAMP_T, ERR_HIST_T };
+enum DPValueType { BOOL, UINT8_T, UINT16_T, UINT32_T, UINT64_T, FLOAT, PTR, TIMESTAMP_T, ERR_HIST_T, CYCLETIME_T };
+
+struct cycletime_s {
+  struct {
+    uint8_t from_hour;
+    uint8_t from_minute;
+    uint8_t till_hour;
+    uint8_t till_minute;
+  } cycle[4];
+};
 
 struct errCode2errStr_t {
   char code;
@@ -156,6 +165,11 @@ class DPValue {
       uint8_t value[MAX_DP_LENGTH];
       size_t length;
     } raw;
+    struct cycletime_t {
+      DPValueType type;
+      cycletime_s value;
+      size_t length;
+    } cycletime;
     // value() : u32{PTR, 0} {}
     value(bool b) : b{BOOL, b} {}
     value(uint8_t u8) : u8{UINT8_T, u8} {}
@@ -164,6 +178,7 @@ class DPValue {
     value(uint64_t u64) : u64{UINT64_T, u64} {}
     value(time_t t) : timestamp{TIMESTAMP_T, t} {}
     value(uint8_t u8, time_t t) : errHist{ERR_HIST_T, t, u8} {}
+    value(cycletime_s ct) : cycletime{CYCLETIME_T, ct} {}
     value(float f) : f{FLOAT, f} {}
     value(uint8_t* r, size_t length) : raw{PTR, {0}, length} {
       if (length <= MAX_DP_LENGTH)
@@ -183,6 +198,7 @@ class DPValue {
   explicit DPValue(time_t t) : v(t) {}
   explicit DPValue(uint8_t u8, time_t u64) : v(u8, u64) {}
   explicit DPValue(float f) : v(f) {}
+  explicit DPValue(cycletime_s t) : v(t) {}
   DPValue(uint8_t* r, size_t length) : v(r, length) {}
   DPValue(DPValue const&) = default;
   ~DPValue() = default;
@@ -280,6 +296,21 @@ class DPValue {
             break;
           }
         }
+      } break;
+      case CYCLETIME_T: {
+        size_t offset = 0;
+        for (uint32_t i = 0; i < 4; ++i) {
+          uint8_t from_hour = v.cycletime.value.cycle[i].from_hour;
+          uint8_t from_minute = v.cycletime.value.cycle[i].from_minute;
+          uint8_t till_hour = v.cycletime.value.cycle[i].till_hour;
+          uint8_t till_minute = v.cycletime.value.cycle[i].till_minute;
+          if (from_hour == 0xff || from_minute == 0xff || till_hour == 0xff || till_minute == 0xff) {
+            offset += snprintf(c + offset, s - offset, "%s", "XX:XX-XX:XX ");
+          } else {
+            offset += snprintf(c + offset, s - offset, "%02u:%02u-%02u:%02u ", from_hour, from_minute, till_hour, till_minute);
+          }
+        }
+        c[offset - 1] = '\0';
       } break;
     }
   }

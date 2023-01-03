@@ -138,3 +138,10 @@ class convTimeStamp : public DPType {
   DPValue decode(const uint8_t* in);
   const size_t getLength() const { return 8; }
 };
+
+class convCycleTime : public DPType {
+ public:
+  void encode(uint8_t* out, DPValue in);
+  DPValue decode(const uint8_t* in);
+  const size_t getLength() const { return 8; }
+};
