@@ -139,26 +139,30 @@ DPValue conv8_1_Timer::decode(const uint8_t* in) {
 void convTimeStamp::encode(uint8_t* out, DPValue in) {
   time_t t = in.getTimeStamp();
   struct tm* tmp = gmtime(&t);
-
-  out[7] = tmp->tm_sec;
-  out[6] = tmp->tm_min;
-  out[5] = tmp->tm_hour;
+  uint32 year = tmp->tm_year + 1900;
+  u_int8_t year4 = (u_int8_t)(year / 1000);
+  u_int8_t year3 = (u_int8_t)((year - year4 * 1000) / 100);
+  u_int8_t year2 = (u_int8_t)((year - year4 * 1000 - year3 * 100) / 10);
+  u_int8_t year1 = year % 10;
+  out[7] = (uint8_t(tmp->tm_sec / 10) << 4) | (tmp->tm_sec % 10);
+  out[6] = (uint8_t(tmp->tm_min / 10) << 4) | (tmp->tm_min % 10);
+  out[5] = (uint8_t(tmp->tm_hour / 10) << 4) | (tmp->tm_hour % 10);
   out[4] = tmp->tm_wday;
-  out[3] = tmp->tm_mday;
-  out[2] = tmp->tm_mon + 1;
-  out[1] = (tmp->tm_year + 1900) % 100;
-  out[0] = (u_int8_t)((tmp->tm_year + 1900) / 100);
+  out[3] = (uint8_t(tmp->tm_mday / 10) << 4) | (tmp->tm_mday % 10);
+  out[2] = (uint8_t((tmp->tm_mon + 1) / 10) << 4) | ((tmp->tm_mon + 1) % 10);
+  out[1] = (year2 << 4) | year1;
+  out[0] = (year4 << 4) | year3;
 }
 
 DPValue convTimeStamp::decode(const uint8_t* in) {
   struct tm tmp;
   tmp.tm_isdst = -1;
-  tmp.tm_hour = in[5];
-  tmp.tm_min = in[6];
-  tmp.tm_sec = in[7];
-  tmp.tm_year = (uint32_t(in[0]) * 100 + uint32_t(in[1])) - 1900;
-  tmp.tm_mon = in[2] - 1;
-  tmp.tm_mday = in[3];
+  tmp.tm_hour = (in[5] >> 4) * 10 + (in[5] & 0x0F);
+  tmp.tm_min = (in[6] >> 4) * 10 + (in[6] & 0x0F);
+  tmp.tm_sec = (in[7] >> 4) * 10 + (in[7] & 0x0F);
+  tmp.tm_year = (in[0] >> 4) * 1000 + (in[0] & 0x0F) * 100 + (in[1] >> 4) * 10 + (in[1] & 0x0F) - 1900;
+  tmp.tm_mon = (in[2] >> 4) * 10 + (in[2] & 0x0F) - 1;
+  tmp.tm_mday = (in[3] >> 4) * 10 + (in[3] & 0x0F);
   time_t timeStamp = mktime(&tmp);
   DPValue out(timeStamp);
   return out;
@@ -176,7 +180,19 @@ DPValue convErrHist::decode(const uint8_t* in) {
 }
 
 void convCycleTime::encode(uint8_t* out, DPValue in) {
-  // TODO
+  const cycletime_s* ct = in.getCycletime();
+  for (uint32_t i = 0; i < 4; ++i) {
+    if (ct->cycle[i].from_hour == 0xff || ct->cycle[i].from_minute == 0xff) {
+      out[i * 2] = 0xff;
+    } else {
+      out[i * 2] = (ct->cycle[i].from_hour << 3) | (ct->cycle[i].from_minute / 10);
+    }
+    if (ct->cycle[i].till_hour == 0xff || ct->cycle[i].till_minute == 0xff) {
+      out[i * 2 + 1] = 0xff;
+    } else {
+      out[i * 2 + 1] = (ct->cycle[i].till_hour << 3) | (ct->cycle[i].till_minute / 10);
+    }
+  }
 }
 
 DPValue convCycleTime::decode(const uint8_t* in) {

@@ -50,6 +50,7 @@ struct errCode2errStr_t {
   const char* str;
 };
 
+// TODO compare with manual
 const char errStr20[] PROGMEM = "Kurzschluss Vorlauftemperatursensor";
 const char errStr10[] PROGMEM = "Kurzschluss Außentemperatursensor";
 const char errStr21[] PROGMEM = "Kurzschluss Ruecklauftemperatursensor";
@@ -247,8 +248,16 @@ class DPValue {
   time_t getTimeStamp() {
     if (v.b.type == ERR_HIST_T || v.b.type == TIMESTAMP_T) {
       return v.timestamp.timeStamp;
-    } else
+    } else {
       return 0;
+    }
+  }
+  const cycletime_s* const getCycletime() {
+    if (v.b.type == CYCLETIME_T) {
+      return &v.cycletime.value;
+    } else {
+      return 0;
+    }
   }
   void getRaw(uint8_t* out) { memcpy(out, &v.raw.value[0], v.raw.length); }
   size_t getRawLength() { return v.raw.length; }

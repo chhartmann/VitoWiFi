@@ -14,11 +14,13 @@ globalCallback uses value.getString(char*,size_t). This method is independent of
 
 VitoWiFi_setProtocol(P300);
 
-DPTemp boilerTemp("boilertemp", "boiler", 0x0800);
-DPCount startsBrenner("pump", "burner", 0x088A);
-DPByte statusStoerung("Status", "status", 0x08A2);
-DPErrHist stoerung1("Stoerung-History1", "error-history", 0x7507);
-DPTimeStamp systemzeit("Systemzeit", "time", 0x088E);
+DPTemp aussenTemp("temp-aussen", "temperature", 0x0800);
+DPTemp boilerTemp("temp-brenner", "temperature", 0x0812);
+DPUnsignedInt startsBrenner("starts-brenner", "burner", 0x088A);
+DPHours laufzeitBrenner("laufzeit-brenner", "burner", 0x08A7);
+DPByte statusStoerung("Status-stoerung", "status", 0x08A2);
+DPErrHist stoerung1("stoerung-history1", "status", 0x7507);
+DPTimeStamp systemzeit("Systemzeit", "status", 0x088E);
 DPCycleTime timerMoHeizen("TimerMoHeizen", "timer-heating", 0x2000);
 
 void tempCallbackHandler(const IDatapoint& dp, DPValue value) {
