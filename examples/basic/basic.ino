@@ -44,6 +44,10 @@ void globalCallbackHandler(const IDatapoint& dp, DPValue value) {
 void setup() {
   //  outsideTemp.setCallback(tempCallbackHandler);
   //  boilerTemp.setCallback(tempCallbackHandler);
+
+  systemzeit.setWriteable(true);
+  timerMoHeizen.setWriteable(true);
+
   VitoWiFi.setGlobalCallback(globalCallbackHandler);  // this callback will be used for all DPs without specific callback
                                                       // must be set after adding at least 1 datapoint
   VitoWiFi.setup(&Serial);
@@ -55,9 +59,33 @@ void setup() {
 
 void loop() {
   static unsigned long lastMillis = 0;
+
+  cycletime_s ct;
+  ct.cycle[0].from_hour = 10;
+  ct.cycle[0].from_minute = 10;
+  ct.cycle[0].till_hour = 11;
+  ct.cycle[0].till_minute = 20;
+  ct.cycle[1].from_hour = 12;
+  ct.cycle[1].from_minute = 30;
+  ct.cycle[1].till_hour = 13;
+  ct.cycle[1].till_minute = 40;
+  ct.cycle[2].from_hour = 14;
+  ct.cycle[2].from_minute = 50;
+  ct.cycle[2].till_hour = 15;
+  ct.cycle[2].till_minute = 14;
+  ct.cycle[3].from_hour = 16;
+  ct.cycle[3].from_minute = 25;
+  ct.cycle[3].till_hour = 16;
+  ct.cycle[3].till_minute = 36;
+
+  time_t rawtime = 1672904253;
+
   if (millis() - lastMillis > 30 * 1000UL) {  // read all values every 60 seconds
     lastMillis = millis();
     VitoWiFi.readAll();
+
+    VitoWiFi.writeDatapoint(systemzeit, DPValue(rawtime));
+    VitoWiFi.writeDatapoint(timerMoHeizen, DPValue(ct));
   }
   VitoWiFi.loop();
 }
