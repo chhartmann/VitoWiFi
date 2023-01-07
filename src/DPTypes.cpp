@@ -140,10 +140,10 @@ void convTimeStamp::encode(uint8_t* out, DPValue in) {
   time_t t = in.getTimeStamp();
   struct tm* tmp = gmtime(&t);
   uint32 year = tmp->tm_year + 1900;
-  u_int8_t year4 = (u_int8_t)(year / 1000);
-  u_int8_t year3 = (u_int8_t)((year - year4 * 1000) / 100);
-  u_int8_t year2 = (u_int8_t)((year - year4 * 1000 - year3 * 100) / 10);
-  u_int8_t year1 = year % 10;
+  uint8_t year4 = (uint8_t)(year / 1000);
+  uint8_t year3 = (uint8_t)((year - year4 * 1000) / 100);
+  uint8_t year2 = (uint8_t)((year - year4 * 1000 - year3 * 100) / 10);
+  uint8_t year1 = year % 10;
   out[7] = (uint8_t(tmp->tm_sec / 10) << 4) | (tmp->tm_sec % 10);
   out[6] = (uint8_t(tmp->tm_min / 10) << 4) | (tmp->tm_min % 10);
   out[5] = (uint8_t(tmp->tm_hour / 10) << 4) | (tmp->tm_hour % 10);
