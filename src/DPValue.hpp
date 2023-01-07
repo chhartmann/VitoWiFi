@@ -154,7 +154,9 @@ class DPValue {
       time_t timeStamp;
     } timestamp;
 
-    struct errHist_t : timestamp_t {
+    struct errHist_t {
+      DPValueType type;
+      time_t timeStamp;
       uint8_t errCode;
     } errHist;
     struct f_t {
@@ -178,7 +180,7 @@ class DPValue {
     value(uint32_t u32) : u32{UINT32_T, u32} {}
     value(uint64_t u64) : u64{UINT64_T, u64} {}
     value(time_t t) : timestamp{TIMESTAMP_T, t} {}
-    value(uint8_t u8, time_t t) : errHist{{ERR_HIST_T, t}, u8} {}
+    value(uint8_t u8, time_t t) : errHist{ERR_HIST_T, t, u8} {}
     value(cycletime_s ct) : cycletime{CYCLETIME_T, ct} {}
     value(float f) : f{FLOAT, f} {}
     value(uint8_t* r, size_t length) : raw{PTR, {0}, length} {
