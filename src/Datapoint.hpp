@@ -82,6 +82,7 @@ class IDatapoint {
   static Callback _globalCb;
   Callback _cb;
   static std::vector<IDatapoint*> _dps;
+  DPValue _lastValue;
 
  public:
   // better not use this publicly
