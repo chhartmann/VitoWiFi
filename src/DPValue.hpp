@@ -173,7 +173,7 @@ class DPValue {
       cycletime_s value;
       size_t length;
     } cycletime;
-    // value() : u32{PTR, 0} {}
+    value() : u32{PTR, 0} {}
     value(bool b) : b{BOOL, b} {}
     value(uint8_t u8) : u8{UINT8_T, u8} {}
     value(uint16_t u16) : u16{UINT16_T, u16} {}
@@ -192,7 +192,7 @@ class DPValue {
   } v;
 
  public:
-  // DPValue() : v() {}
+  DPValue() : v() {}
   explicit DPValue(bool b) : v(b) {}
   explicit DPValue(uint8_t u8) : v(u8) {}
   explicit DPValue(uint16_t u16) : v(u16) {}
