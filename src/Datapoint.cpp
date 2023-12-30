@@ -52,3 +52,7 @@ void IDatapoint::setValue(DPValue value) {
     _globalCb(*this, value);
   }
 }
+
+DPValue IDatapoint::getLastValue() {
+  return _lastValue;
+}
