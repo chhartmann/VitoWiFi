@@ -45,6 +45,7 @@ IDatapoint::~IDatapoint() {
 }
 
 void IDatapoint::setValue(DPValue value) {
+  _lastValue = value;
   if (_cb) {
     _cb(*this, value);
   } else if (_globalCb) {
