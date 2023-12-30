@@ -205,6 +205,9 @@ class DPValue {
   DPValue(uint8_t* r, size_t length) : v(r, length) {}
   DPValue(DPValue const&) = default;
   ~DPValue() = default;
+  DPValueType getType() {
+    return v.b.type;
+  }
   bool getBool() {
     if (v.b.type == BOOL) {
       return v.b.value;
