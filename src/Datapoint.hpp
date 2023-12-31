@@ -73,7 +73,7 @@ class IDatapoint {
   virtual void encode(uint8_t* out, const DPValue in) = 0;
   virtual DPValue decode(const uint8_t* in) = 0;
   void setValue(DPValue value);
-  const DPValue getLastValue();
+  DPValue getLastValue() const;
 
  protected:
   const char* _name;
