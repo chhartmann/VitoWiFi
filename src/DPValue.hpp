@@ -284,7 +284,7 @@ class DPValue {
         snprintf(c, s, "%llu", v.u64.value);
         break;
       case FLOAT:
-          ext_snprintf(c, s, PSTR("%1_f"), &v.f.value);
+          ext_snprintf_P(c, s, PSTR("%1_f"), &v.f.value);
 //        snprintf(c, s, "%.1f", v.f.value);
 
         break;
