@@ -33,6 +33,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <time.h>
 #include "Constants.hpp"
 #include "HardwareSerial.h"
+#include "ext_printf.h" // from tasmota
 
 enum DPValueType { BOOL, UINT8_T, UINT16_T, UINT32_T, UINT64_T, FLOAT, PTR, TIMESTAMP_T, ERR_HIST_T, CYCLETIME_T };
 
