@@ -53,6 +53,6 @@ void IDatapoint::setValue(DPValue value) {
   }
 }
 
-DPValue IDatapoint::getLastValue() {
+DPValue IDatapoint::getLastValue() const {
   return _lastValue;
 }
